@@ -10,4 +10,4 @@ pipelines:
           - apt-get -y install git
           - mkdir -p build
           - cd build; cmake ..; make
-          - ./build/src/wave/wave_tests
+          - ./src/wave/wave_tests

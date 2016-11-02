@@ -10,8 +10,8 @@ struct RIFFHeader {
 };
 RIFFHeader MakeRIFFHeader() {
   RIFFHeader header;
-  strcpy(header.chunk_id, "RIFF");
-  strcpy(header.format, "WAVE");
+  strncpy(header.chunk_id, "RIFF", 4);
+  strncpy(header.format, "WAVE", 4);
   return header;
 }
 
@@ -27,7 +27,7 @@ struct FMTHeader {
 };
 FMTHeader MakeFMTHeader() {
   FMTHeader header;
-  strcpy(header.sub_chunk_1_id, "fmt ");
+  strncpy(header.sub_chunk_1_id, "fmt ", 4);
   header.sub_chunk_1_size = 16;
   // default values
   header.audio_format = 1;  // PCM
@@ -45,7 +45,7 @@ struct DataHeader {
 };
 DataHeader MakeDataHeader() {
   DataHeader header;
-  strcpy(header.sub_chunk_2_id, "data");
+  strncpy(header.sub_chunk_2_id, "data", 4);
   return header;
 }
 

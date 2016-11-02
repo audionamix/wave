@@ -9,12 +9,20 @@ if (${wave_enable_tests})
     ${src}/wave/file_test.cc
   )
   add_dependencies(wave_tests googletest)
-  target_link_libraries(wave_tests
-    gtest
-    gtest_main
-    wave
-    pthread
-  )
+  if (UNIX AND NOT APPLE)
+    target_link_libraries(wave_tests
+      gtest
+      gtest_main
+      wave
+      pthread
+    )
+  else()
+    target_link_libraries(wave_tests
+      gtest
+      gtest_main
+      wave
+    )
+  endif()
   target_include_directories(wave_tests
     PUBLIC
       ${gtest_install_dir}/include

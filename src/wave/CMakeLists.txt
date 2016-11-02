@@ -10,9 +10,10 @@ if (${wave_enable_tests})
   )
   add_dependencies(wave_tests googletest)
   target_link_libraries(wave_tests
-    wave
     gtest
     gtest_main
+    wave
+    pthread
   )
   target_include_directories(wave_tests
     PUBLIC

@@ -5,6 +5,7 @@
 #include <system_error>
 #include <ios>
 #include <vector>
+#include <memory>
 
 #include <stdint.h>
 

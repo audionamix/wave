@@ -1,6 +1,8 @@
 #include "wave/file.h"
 
 #include <fstream>
+#include <cstring>
+#include <limits>
 
 #include "wave/headers.h"
 

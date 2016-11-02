@@ -1,0 +1,13 @@
+image: ubuntu:16.04
+
+pipelines:
+  default:
+    - step:
+        script:
+          - apt-get -y update
+          - apt-get -y install cmake
+          - apt-get -y install g++
+          - apt-get -y install git
+          - mkdir -p build
+          - cd build; cmake ..; make
+          - ./build/src/wave/Debug/wave_tests

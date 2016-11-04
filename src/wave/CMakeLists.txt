@@ -4,6 +4,18 @@ add_library(wave
   ${src}/wave/file.cc
 )
 
+# install rules
+install(TARGETS wave
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+install(FILES
+  ${src}/wave/file.h
+  DESTINATION include
+)
+
+# tests
 if (${wave_enable_tests})
   add_executable(wave_tests
     ${src}/wave/file_test.cc

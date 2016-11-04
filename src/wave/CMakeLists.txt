@@ -12,7 +12,7 @@ install(TARGETS wave
 )
 install(FILES
   ${src}/wave/file.h
-  DESTINATION include
+  DESTINATION include/wave
 )
 
 # tests

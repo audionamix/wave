@@ -2,10 +2,13 @@
 #define WAVE_WAVE_FILE_H_
 
 #include <string>
-#include <system_error>
 #include <ios>
 #include <vector>
+
+#if __cplusplus > 199711L
+#include <system_error>
 #include <memory>
+#endif  // __cplusplus > 199711L
 
 #include <stdint.h>
 
@@ -13,6 +16,7 @@ namespace wave {
 class File {
  public:
   File();
+  ~File();
   void Open(const std::string& path);
 
   uint16_t channel_number() const;
@@ -24,15 +28,20 @@ class File {
   uint16_t bits_per_sample() const;
   void set_bits_per_sample(uint16_t bits_per_sample);
 
+  // Don't handle error
+  std::vector<float> Read();
+  void Write(const std::vector<float>& data);
+  
+#if __cplusplus > 199711L
   // Read interleaved data
   std::vector<float> Read(std::error_code& err);
-
   // Write interleaved data
   void Write(const std::vector<float>& data, std::error_code& err);
-
+#endif  // __cplusplus > 199711L
+  
  private:
   class Impl;
-  std::shared_ptr<Impl> impl_;
+  Impl* impl_;
 };
 }  // namespace wave
 

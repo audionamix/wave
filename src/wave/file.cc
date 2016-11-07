@@ -14,15 +14,14 @@ class File::Impl {
   WAVEHeader header;
 };
 
-File::File() : impl_(std::make_shared<Impl>()) {
-  impl_->header = MakeWAVEHeader();
-}
+File::File() : impl_(new Impl()) { impl_->header = MakeWAVEHeader(); }
+File::~File() { delete impl_; }
 
 void File::Open(const std::string& path) {
   impl_->path = path;
 
   // if file exists and is big enough, read wave header
-  std::ifstream stream(impl_->path, std::ios::binary);
+  std::ifstream stream(impl_->path.c_str(), std::ios::binary);
   if (!stream.is_open()) {
     return;
   }
@@ -50,7 +49,7 @@ void File::set_bits_per_sample(uint16_t bits_per_sample) {
   impl_->header.fmt.bits_per_sample = bits_per_sample;
 }
 
-std::vector<float> File::Read(std::error_code& err) {
+std::vector<float> File::Read() {
   auto bits_per_sample = impl_->header.fmt.bits_per_sample;
   auto bytes_per_sample = bits_per_sample / 8;
 
@@ -59,9 +58,8 @@ std::vector<float> File::Read(std::error_code& err) {
   std::vector<float> result(sample_number);
 
   // open the selected file for reading
-  std::ifstream stream(impl_->path, std::ios::binary);
+  std::ifstream stream(impl_->path.c_str(), std::ios::binary);
   if (!stream.is_open()) {
-    err = std::make_error_code(std::errc::io_error);
     return std::vector<float>();
   }
 
@@ -89,8 +87,6 @@ std::vector<float> File::Read(std::error_code& err) {
       result[sample_idx] =
           static_cast<float>(value) / std::numeric_limits<int32_t>::max();
     } else {
-      // any other bit rate isn't supported yet
-      err = std::make_error_code(std::errc::not_supported);
       return std::vector<float>();
     }
   }
@@ -98,7 +94,21 @@ std::vector<float> File::Read(std::error_code& err) {
   return result;
 }
 
-void File::Write(const std::vector<float>& data, std::error_code& err) {
+#if __cplusplus > 199711L
+std::vector<float> File::Read(std::error_code& err) {
+  // check if file exists
+  {
+    std::ifstream stream(impl_->path.c_str(), std::ios::binary);
+    if (!stream.is_open()) {
+      err = std::make_error_code(std::errc::io_error);
+      return std::vector<float>();
+    }
+  }
+  return Read();
+}
+#endif  // __cplusplus > 199711L
+  
+void File::Write(const std::vector<float>& data) {
   // set by user. Should not be updated
   auto bits_per_sample = impl_->header.fmt.bits_per_sample;
   auto bytes_per_sample = bits_per_sample / 8;
@@ -115,9 +125,8 @@ void File::Write(const std::vector<float>& data, std::error_code& err) {
   impl_->header.data.sub_chunk_2_size = data.size() * bytes_per_sample;
 
   // open file
-  std::ofstream stream(impl_->path, std::ios::binary);
+  std::ofstream stream(impl_->path.c_str(), std::ios::binary);
   if (!stream.is_open()) {
-    err = std::make_error_code(std::errc::io_error);
     return;
   }
   // write header
@@ -141,12 +150,23 @@ void File::Write(const std::vector<float>& data, std::error_code& err) {
       stream.write(reinterpret_cast<char*>(&value), sizeof(value));
     } else {
       // any other bit rate isn't supported yet
-      err = std::make_error_code(std::errc::not_supported);
       return;
     }
   }
   stream.flush();
   stream.close();
 }
+
+#if __cplusplus > 199711L
+void File::Write(const std::vector<float>& data, std::error_code& err) {
+  // check supported bit rate
+  auto bits_per_sample = impl_->header.fmt.bits_per_sample;
+  if (bits_per_sample != 8 && bits_per_sample != 16 && bits_per_sample != 32) {
+    err = std::make_error_code(std::errc::not_supported);
+    return;
+  }
+  Write(data);
+}
+#endif  // __cplusplus > 199711L
 
 }  // namespace wave

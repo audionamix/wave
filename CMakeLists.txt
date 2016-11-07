@@ -6,8 +6,11 @@ project(wave)
 # build options
 option(wave_enable_tests "Build Unit tests" ON)
 
-# use of c++14
-set(CMAKE_CXX_STANDARD 14)
+# if cmake osx deployment target is defined, don't override the cxx standard
+if (NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+  # use of c++14
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
 if (${wave_enable_tests})
   enable_testing()

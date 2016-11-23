@@ -10,11 +10,13 @@ addons:
       - cmake
       - cmake-data
       - g++-5
+      - sox
 
 script:
   - mkdir build
   - cd build
   - cmake -DCMAKE_INSTALL_PREFIX=$PWD/install ..
+  - soxi test_resource/test1.wav
   - make
   - ./src/wave/wave_tests
   - make install

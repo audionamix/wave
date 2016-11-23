@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/audionamix/wave.svg?branch=master)](https://travis-ci.org/audionamix/wave)
+
 ## Libwave
 A simple cross platform C++ interface for reading WAVE files.
 

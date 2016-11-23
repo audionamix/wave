@@ -12,17 +12,18 @@ addons:
       - g++-5
       - sox
 
+before_script:
+  - curl -O https://archive.org/download/test_wav/Untitled3.wav
+  - mv Untitled3.wav test1.wav
+  - soxi test1.wav
+
 script:
   - mkdir build
   - cd build
   - cmake -DCMAKE_INSTALL_PREFIX=$PWD/install ..
 
-  # downloading resource doesn't work on current cmake version
-  - cd test_resource
-  - curl -O https://archive.org/download/test_wav/Untitled3.wav
-  - mv Untitled3.wav test1.wav
-  - cd ..
-  - soxi test_resource/test1.wav
+  # downloading resource doesn't seem to work
+  - mv ../test1.wav test_resource/test1.wav
 
   - make
   - ./src/wave/wave_tests

@@ -1,0 +1,18 @@
+language:
+  - cpp
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - cmake
+      - g++-5
+
+script:
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_INSTALL_PREFIX=$PWD/install ..
+  - make
+  - ./src/wave/wave_tests
+  - make install

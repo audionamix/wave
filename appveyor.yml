@@ -13,10 +13,8 @@ build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - cd build
   - cmake --build .
+  - src/wave/Debug/wave_tests.exe
   - cmake --build . --target install --config Release
-
-test_script:
-  - %APPVEYOR_BUILD_FOLDER%/build/src/wave/Debug/wave_tests.exe
 
 artifacts:
   - path: build/install

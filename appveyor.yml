@@ -1,0 +1,22 @@
+version: 0.4.{build}a
+
+branches:
+  only:
+  - master
+
+before_build:
+  - cd build
+  - cmake -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/build/install ..
+
+build_script:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - cd build
+  - cmake --build .
+  - cmake --build . --target install --config Release
+
+test_script:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - build/src/wave/Debug/wave_tests.exe
+
+artifacts:
+  - path: build/install

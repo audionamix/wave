@@ -5,6 +5,7 @@ branches:
   - master
 
 before_build:
+  - mkdir build
   - cd build
   - cmake -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/build/install ..
 

@@ -18,6 +18,9 @@ class File {
   File();
   ~File();
   void Open(const std::string& path);
+#if __cplusplus > 199711L
+  void Open(const std::string& path, std::error_code& err);
+#endif  // __cplusplus > 199711L
 
   uint16_t channel_number() const;
   void set_channel_number(uint16_t channel_number);
@@ -31,15 +34,17 @@ class File {
   // Don't handle error
   std::vector<float> Read();
   void Write(const std::vector<float>& data);
-  
+
 #if __cplusplus > 199711L
   // Read interleaved data
   std::vector<float> Read(std::error_code& err);
   // Write interleaved data
   void Write(const std::vector<float>& data, std::error_code& err);
 #endif  // __cplusplus > 199711L
-  
+
  private:
+  int ReadHeader();
+  
   class Impl;
   Impl* impl_;
 };

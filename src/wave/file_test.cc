@@ -12,13 +12,13 @@ TEST(Wave, Read) {
   std::error_code err;
   read_file.Open(gResourcePath + "/Untitled3.wav", err);
   ASSERT_FALSE(err);
-#else 
-  read_file.Open(gResourcePath + "/Untitled3.wav")
+#else
+  read_file.Open(gResourcePath + "/Untitled3.wav");
 #endif
   ASSERT_EQ(read_file.sample_rate(), 44100);
   ASSERT_EQ(read_file.bits_per_sample(), 16);
   ASSERT_EQ(read_file.channel_number(), 2);
-  
+
 #if __cplusplus > 199711L
   auto content = read_file.Read(err);
   ASSERT_FALSE(err);
@@ -42,7 +42,7 @@ TEST(Wave, Write) {
   auto content = read_file.Read(err);
   ASSERT_FALSE(err);
 #else   // __cplusplus > 199711L
-  read_file.Open(gResourcePath + "/Untitled3.wav")
+  read_file.Open(gResourcePath + "/Untitled3.wav");
   auto content = read_file.Read();
 #endif  // __cplusplus > 199711L
 
@@ -75,23 +75,39 @@ TEST(Wave, Write) {
   ASSERT_EQ(content, re_read_content);
 }
 
+struct WikipediaFile {
+  int sample_rate;
+  int bits_per_sample;
+  std::string file_name;
+};
+WikipediaFile MakeFileDesc(int sample_rate, int bits_per_sample,
+                           const std::string& file_name) {
+  WikipediaFile f;
+  f.sample_rate = sample_rate;
+  f.bits_per_sample = bits_per_sample;
+  f.file_name = file_name;
+  return f;
+}
+
 TEST(Wave, Wikipedia) {
   using namespace wave;
-  struct WikipediaFile {
-    int sample_rate;
-    int bits_per_sample;
-    std::string file_name;
-  };
 
-  std::vector<WikipediaFile> files_info = {
-      {11025, 16, "11k16bitpcm.wav"}, {8000, 16, "8k16bitpcm.wav"},
-      {11025, 8, "11k8bitpcm.wav"},   {11025, 8, "11kulaw.wav"},
-      {8000, 8, "8k8bitpcm.wav"},     {8000, 8, "8kulaw.wav"},
-      {11025, 4, "11kadpcm.wav"},     {8000, 4, "8kadpcm.wav"},
-      {11025, 16, "11kgsm.wav"},      {8000, 16, "8kmp316.wav"},
-      {8000, 16, "8kgsm.wav"},        {8000, 16, "8ksbc12.wav"},
-      {8000, 16, "8ktruespeech.wav"}, {8000, 16, "8kmp38.wav"},
-      {8000, 16, "8kcelp.wav"}};
+  std::vector<WikipediaFile> files_info;
+  files_info.push_back(MakeFileDesc(11025, 16, "11k16bitpcm.wav"));
+  files_info.push_back(MakeFileDesc(8000, 16, "8k16bitpcm.wav"));
+  files_info.push_back(MakeFileDesc(11025, 8, "11k8bitpcm.wav"));
+  files_info.push_back(MakeFileDesc(11025, 8, "11kulaw.wav"));
+  files_info.push_back(MakeFileDesc(8000, 8, "8k8bitpcm.wav"));
+  files_info.push_back(MakeFileDesc(8000, 8, "8kulaw.wav"));
+  files_info.push_back(MakeFileDesc(11025, 4, "11kadpcm.wav"));
+  files_info.push_back(MakeFileDesc(8000, 4, "8kadpcm.wav"));
+  files_info.push_back(MakeFileDesc(11025, 16, "11kgsm.wav"));
+  files_info.push_back(MakeFileDesc(8000, 16, "8kmp316.wav"));
+  files_info.push_back(MakeFileDesc(8000, 16, "8kgsm.wav"));
+  files_info.push_back(MakeFileDesc(8000, 16, "8ksbc12.wav"));
+  files_info.push_back(MakeFileDesc(8000, 16, "8ktruespeech.wav"));
+  files_info.push_back(MakeFileDesc(8000, 16, "8kmp38.wav"));
+  files_info.push_back(MakeFileDesc(8000, 16, "8kcelp.wav"));
 
   for (const auto& file_info : files_info) {
     wave::File file;

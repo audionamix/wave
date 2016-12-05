@@ -32,19 +32,19 @@ void File::Open(const std::string& path, std::error_code& err) {
   }
   
   // check headers ids
-  if (std::string(impl_->header.riff.chunk_id) != "RIFF") {
+  if (std::string(impl_->header.riff.chunk_id, 4) != "RIFF") {
     err = std::make_error_code(std::errc::bad_file_descriptor);
     return;
   }
-  if (std::string(impl_->header.riff.format) != "WAVE") {
+  if (std::string(impl_->header.riff.format, 4) != "WAVE") {
     err = std::make_error_code(std::errc::bad_file_descriptor);
     return;
   }
-  if (std::string(impl_->header.fmt.sub_chunk_1_id) != "fmt ") {
+  if (std::string(impl_->header.fmt.sub_chunk_1_id, 4) != "fmt ") {
     err = std::make_error_code(std::errc::bad_file_descriptor);
     return;
   }
-  if (std::string(impl_->header.data.sub_chunk_2_id) != "data") {
+  if (std::string(impl_->header.data.sub_chunk_2_id, 4) != "data") {
     err = std::make_error_code(std::errc::bad_file_descriptor);
     return;
   }

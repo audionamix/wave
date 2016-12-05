@@ -8,13 +8,18 @@ TEST(Wave, Read) {
   using namespace wave;
 
   File read_file;
-  read_file.Open(gResourcePath + "/test1.wav");
+#if __cplusplus > 199711L
+  std::error_code err;
+  read_file.Open(gResourcePath + "/Untitled3.wav", err);
+  ASSERT_FALSE(err);
+#else 
+  read_file.Open(gResourcePath + "/Untitled3.wav")
+#endif
   ASSERT_EQ(read_file.sample_rate(), 44100);
   ASSERT_EQ(read_file.bits_per_sample(), 16);
   ASSERT_EQ(read_file.channel_number(), 2);
-
+  
 #if __cplusplus > 199711L
-  std::error_code err;
   auto content = read_file.Read(err);
   ASSERT_FALSE(err);
 #else   // __cplusplus > 199711L
@@ -30,12 +35,14 @@ TEST(Wave, Write) {
 
   // tested above
   File read_file;
-  read_file.Open(gResourcePath + "/test1.wav");
 #if __cplusplus > 199711L
   std::error_code err;
+  read_file.Open(gResourcePath + "/Untitled3.wav", err);
+  ASSERT_FALSE(err);
   auto content = read_file.Read(err);
   ASSERT_FALSE(err);
 #else   // __cplusplus > 199711L
+  read_file.Open(gResourcePath + "/Untitled3.wav")
   auto content = read_file.Read();
 #endif  // __cplusplus > 199711L
 

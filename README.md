@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/audionamix/wave.svg?branch=master)](https://travis-ci.org/audionamix/wave)
+[![Build status](https://ci.appveyor.com/api/projects/status/7pqh879hbw9tehds?svg=true)](https://ci.appveyor.com/project/gvne/wave)
+
 
 ## Libwave
 A simple cross platform C++ interface for reading WAVE files.

@@ -13,14 +13,46 @@
 #include <stdint.h>
 
 namespace wave {
+
+enum OpenMode { kIn, kOut };
+
+enum Error {
+  kNoError,
+  kFailedToOpen,
+  kNotOpen,
+  kInvalidFormat,
+  kWriteError,
+  kReadError
+};
+
 class File {
  public:
   File();
   ~File();
-  void Open(const std::string& path);
-#if __cplusplus > 199711L
-  void Open(const std::string& path, std::error_code& err);
-#endif  // __cplusplus > 199711L
+
+  /**
+   * @brief Open wave file at given path
+   */
+  Error Open(const std::string& path, OpenMode mode);
+
+  /**
+   * @brief Read the entire content of file.
+   * @note: File has to be opened in kOut mode of kNotOpen will be returned
+   */
+  Error Read(std::vector<float>* output);
+
+  /**
+   * @brief Read the given number of frames from file.
+   * @note: File has to be opened in kOut mode of kNotOpen will be returned.
+   * If file is too small, kInvalidFormat is returned
+   */
+  Error Read(uint64_t frame_number, std::vector<float>* output);
+
+  /**
+   * @brief Write the given data
+   * @note: File has to be opened in kIn mode of kNotOpen will be returned.
+   */
+  Error Write(const std::vector<float>& data);
 
   uint16_t channel_number() const;
   void set_channel_number(uint16_t channel_number);
@@ -31,20 +63,7 @@ class File {
   uint16_t bits_per_sample() const;
   void set_bits_per_sample(uint16_t bits_per_sample);
 
-  // Don't handle error
-  std::vector<float> Read();
-  void Write(const std::vector<float>& data);
-
-#if __cplusplus > 199711L
-  // Read interleaved data
-  std::vector<float> Read(std::error_code& err);
-  // Write interleaved data
-  void Write(const std::vector<float>& data, std::error_code& err);
-#endif  // __cplusplus > 199711L
-
  private:
-  int ReadHeader();
-  
   class Impl;
   Impl* impl_;
 };

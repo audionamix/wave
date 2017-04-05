@@ -113,7 +113,12 @@ class File::Impl {
 };
 
 File::File() : impl_(new Impl()) { impl_->header = MakeWAVEHeader(); }
-File::~File() { delete impl_; }
+File::~File() {
+  if (impl_->istream.is_open()) {
+    impl_->ostream.flush();
+  }
+  delete impl_;
+}
 
 Error File::Open(const std::string& path, OpenMode mode) {
   if (mode == OpenMode::kOut) {
@@ -148,8 +153,12 @@ void File::set_bits_per_sample(uint16_t bits_per_sample) {
   impl_->header.fmt.bits_per_sample = bits_per_sample;
 }
 
+uint64_t File::frame_number() const {
+  return impl_->sample_number() / channel_number();
+}
+
 Error File::Read(std::vector<float>* output) {
-  return Read(impl_->sample_number() / channel_number(), output);
+  return Read(frame_number(), output);
 }
 
 Error File::Read(uint64_t frame_number, std::vector<float>* output) {
@@ -225,9 +234,6 @@ Error File::Write(const std::vector<float>& data) {
 
   // update header to show the right data size
   impl_->WriteHeader(current_data_size + data.size());
-
-  // TODO: force flush is sub optimal
-  impl_->ostream.flush();
 
   return kNoError;
 }

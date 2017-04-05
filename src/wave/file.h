@@ -62,6 +62,8 @@ class File {
 
   uint16_t bits_per_sample() const;
   void set_bits_per_sample(uint16_t bits_per_sample);
+  
+  uint64_t frame_number() const;
 
  private:
   class Impl;

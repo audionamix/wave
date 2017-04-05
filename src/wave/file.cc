@@ -1,3 +1,5 @@
+  
+    
 
 
 #include "wave/file.h"
@@ -237,5 +239,44 @@ Error File::Write(const std::vector<float>& data) {
 
   return kNoError;
 }
+
+#if __cplusplus > 199711L
+  
+std::error_code make_error_code(Error err) {
+  switch (err) {
+    case kFailedToOpen:
+      return std::make_error_code(std::errc::io_error);
+    case kNotOpen:
+      return std::make_error_code(std::errc::operation_not_permitted);
+    case kInvalidFormat:
+      return std::make_error_code(std::errc::executable_format_error);
+    case kWriteError:
+      return std::make_error_code(std::errc::io_error);
+    case kReadError:
+      return std::make_error_code(std::errc::io_error);
+    default:
+      return std::error_code();
+  }
+}
+
+std::vector<float> File::Read(std::error_code& err) {
+  std::vector<float> output;
+  auto wave_error = Read(&output);
+  err = make_error_code(wave_error);
+  return output;
+}
+
+std::vector<float> File::Read(uint64_t frame_number, std::error_code& err) {
+  std::vector<float> output;
+  auto wave_error = Read(frame_number, &output);
+  err = make_error_code(wave_error);
+  return output;
+}
+
+void File::Write(const std::vector<float>& data, std::error_code& err) {
+  auto wave_error = Write(data);
+  err = make_error_code(wave_error);
+}
+#endif  // __cplusplus > 199711L
 
 }  // namespace wave

@@ -53,6 +53,13 @@ class File {
    * @note: File has to be opened in kIn mode of kNotOpen will be returned.
    */
   Error Write(const std::vector<float>& data);
+  
+#if __cplusplus > 199711L
+  // Modern C++ interface
+  std::vector<float> Read(std::error_code& err);
+  std::vector<float> Read(uint64_t frame_number, std::error_code& err);
+  void Write(const std::vector<float>& data, std::error_code& err);
+#endif  // __cplusplus > 199711L
 
   uint16_t channel_number() const;
   void set_channel_number(uint16_t channel_number);

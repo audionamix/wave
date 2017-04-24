@@ -1,7 +1,3 @@
-  
-    
-
-
 #include "wave/file.h"
 
 #include <fstream>
@@ -12,6 +8,11 @@
 #include "wave/headers.h"
 
 namespace wave {
+
+namespace internal {
+void NoEncrypt(char* data, size_t size) {}
+void NoDecrypt(char* data, size_t size) {}
+}  // namespace internal
 
 class File::Impl {
  public:
@@ -160,10 +161,19 @@ uint64_t File::frame_number() const {
 }
 
 Error File::Read(std::vector<float>* output) {
-  return Read(frame_number(), output);
+  return Read(internal::NoDecrypt, output);
+}
+
+Error File::Read(void (*decrypt)(char*, size_t), std::vector<float>* output) {
+  return Read(frame_number(), decrypt, output);
 }
 
 Error File::Read(uint64_t frame_number, std::vector<float>* output) {
+  return Read(frame_number, internal::NoDecrypt, output);
+}
+
+Error File::Read(uint64_t frame_number, void (*decrypt)(char*, size_t),
+                 std::vector<float>* output) {
   if (!impl_->istream.is_open()) {
     return kNotOpen;
   }
@@ -183,18 +193,21 @@ Error File::Read(uint64_t frame_number, std::vector<float>* output) {
       // 8bits case
       int8_t value;
       impl_->istream.read(reinterpret_cast<char*>(&value), sizeof(value));
+      decrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       (*output)[sample_idx] =
           static_cast<float>(value) / std::numeric_limits<int8_t>::max();
     } else if (impl_->header.fmt.bits_per_sample == 16) {
       // 16 bits
       int16_t value;
       impl_->istream.read(reinterpret_cast<char*>(&value), sizeof(value));
+      decrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       (*output)[sample_idx] =
           static_cast<float>(value) / std::numeric_limits<int16_t>::max();
     } else if (impl_->header.fmt.bits_per_sample == 32) {
       // 32bits
       int32_t value;
       impl_->istream.read(reinterpret_cast<char*>(&value), sizeof(value));
+      decrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       (*output)[sample_idx] =
           static_cast<float>(value) / std::numeric_limits<int32_t>::max();
     } else {
@@ -205,6 +218,11 @@ Error File::Read(uint64_t frame_number, std::vector<float>* output) {
 }
 
 Error File::Write(const std::vector<float>& data) {
+  return Write(data, internal::NoEncrypt);
+}
+
+Error File::Write(const std::vector<float>& data,
+                  void (*encrypt)(char* data, size_t size)) {
   if (!impl_->ostream.is_open()) {
     return kNotOpen;
   }
@@ -218,16 +236,19 @@ Error File::Write(const std::vector<float>& data) {
       // 8bits case
       int8_t value =
           static_cast<int8_t>(sample * std::numeric_limits<int8_t>::max());
+      encrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       impl_->ostream.write(reinterpret_cast<char*>(&value), sizeof(value));
     } else if (bits_per_sample == 16) {
       // 16 bits
       int16_t value =
           static_cast<int16_t>(sample * std::numeric_limits<int16_t>::max());
+      encrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       impl_->ostream.write(reinterpret_cast<char*>(&value), sizeof(value));
     } else if (bits_per_sample == 32) {
       // 32bits
       int32_t value =
           static_cast<int32_t>(sample * std::numeric_limits<int32_t>::max());
+      encrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       impl_->ostream.write(reinterpret_cast<char*>(&value), sizeof(value));
     } else {
       return kInvalidFormat;
@@ -241,7 +262,7 @@ Error File::Write(const std::vector<float>& data) {
 }
 
 #if __cplusplus > 199711L
-  
+
 std::error_code make_error_code(Error err) {
   switch (err) {
     case kFailedToOpen:

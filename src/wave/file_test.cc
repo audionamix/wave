@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <cmath>
+#include <iostream>
+
 #include "wave/file.h"
 
 const std::string gResourcePath(TEST_RESOURCES_PATH);
@@ -174,6 +177,47 @@ TEST(Wave, WriteModern) {
   File re_read_file;
   re_read_file.Open(gResourcePath + "/output.wav", OpenMode::kIn);
   auto re_read_content = re_read_file.Read(err);
+  
+  ASSERT_FALSE(err);
+  ASSERT_EQ(read_file.channel_number(), re_read_file.channel_number());
+  ASSERT_EQ(read_file.sample_rate(), re_read_file.sample_rate());
+  ASSERT_EQ(read_file.channel_number(), re_read_file.channel_number());
+  ASSERT_EQ(read_file.bits_per_sample(), re_read_file.bits_per_sample());
+  ASSERT_EQ(content, re_read_content);
+}
+
+
+void XOR(char* data, size_t size) {
+  for (size_t idx = 0; idx < size; idx++) {
+    data[idx] = data[idx] ^ 1;
+  }
+}
+
+TEST(Wave, ReadWriteXOR) {
+  using namespace wave;
+  std::error_code err;
+  
+  File read_file;
+  read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
+  auto content = read_file.Read(err);
+  
+  // write with xor
+  {
+    File write_file;
+    write_file.Open(gResourcePath + "/output.wav", OpenMode::kOut);
+    write_file.set_sample_rate(read_file.sample_rate());
+    write_file.set_bits_per_sample(read_file.bits_per_sample());
+    write_file.set_channel_number(read_file.channel_number());
+    write_file.Write(content, XOR);
+    
+    ASSERT_FALSE(err);
+  }
+  
+  // re read
+  File re_read_file;
+  re_read_file.Open(gResourcePath + "/output.wav", OpenMode::kIn);
+  std::vector<float> re_read_content;
+  re_read_file.Read(XOR, &re_read_content);
   
   ASSERT_FALSE(err);
   ASSERT_EQ(read_file.channel_number(), re_read_file.channel_number());

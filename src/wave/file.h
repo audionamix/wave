@@ -49,13 +49,30 @@ class File {
   Error Read(uint64_t frame_number, std::vector<float>* output);
 
   /**
+   * @brief Read and decrypt the entire content of file.
+   * @note: File has to be opened in kOut mode of kNotOpen will be returned
+   */
+  Error Read(void (*decrypt)(char* data, size_t size),
+             std::vector<float>* output);
+  Error Read(uint64_t frame_number, void (*decrypt)(char* data, size_t size),
+             std::vector<float>* output);
+
+  /**
    * @brief Write the given data
    * @note: File has to be opened in kIn mode of kNotOpen will be returned.
    */
   Error Write(const std::vector<float>& data);
-  
+
+  /**
+   * @brief Write and Encrypt using encryption function
+   * @note: File has to be opened in kIn mode of kNotOpen will be returned.
+   */
+  Error Write(const std::vector<float>& data,
+              void (*encrypt)(char* data, size_t size));
+
 #if __cplusplus > 199711L
   // Modern C++ interface
+  // TODO: add std::function version of Read and Write with encrypted
   std::vector<float> Read(std::error_code& err);
   std::vector<float> Read(uint64_t frame_number, std::error_code& err);
   void Write(const std::vector<float>& data, std::error_code& err);
@@ -69,7 +86,7 @@ class File {
 
   uint16_t bits_per_sample() const;
   void set_bits_per_sample(uint16_t bits_per_sample);
-  
+
   uint64_t frame_number() const;
 
  private:

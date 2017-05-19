@@ -135,19 +135,18 @@ TEST(Wave, ChunkWrite) {
   ASSERT_EQ(content, re_read_content);
 }
 
-
 #if __cplusplus > 199711L
 TEST(Wave, ReadModern) {
   using namespace wave;
   std::error_code err;
-  
+
   File read_file;
   read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
-  
+
   ASSERT_EQ(read_file.sample_rate(), 44100);
   ASSERT_EQ(read_file.bits_per_sample(), 16);
   ASSERT_EQ(read_file.channel_number(), 2);
-  
+
   auto content = read_file.Read(err);
   ASSERT_FALSE(err);
   ASSERT_EQ(content.size() / read_file.channel_number(),
@@ -157,11 +156,11 @@ TEST(Wave, ReadModern) {
 TEST(Wave, WriteModern) {
   using namespace wave;
   std::error_code err;
-  
+
   File read_file;
   read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
   auto content = read_file.Read(err);
-  
+
   {
     File write_file;
     write_file.Open(gResourcePath + "/output.wav", OpenMode::kOut);
@@ -169,15 +168,15 @@ TEST(Wave, WriteModern) {
     write_file.set_bits_per_sample(read_file.bits_per_sample());
     write_file.set_channel_number(read_file.channel_number());
     write_file.Write(content, err);
-    
+
     ASSERT_FALSE(err);
   }
-  
+
   // re read
   File re_read_file;
   re_read_file.Open(gResourcePath + "/output.wav", OpenMode::kIn);
   auto re_read_content = re_read_file.Read(err);
-  
+
   ASSERT_FALSE(err);
   ASSERT_EQ(read_file.channel_number(), re_read_file.channel_number());
   ASSERT_EQ(read_file.sample_rate(), re_read_file.sample_rate());
@@ -185,7 +184,6 @@ TEST(Wave, WriteModern) {
   ASSERT_EQ(read_file.bits_per_sample(), re_read_file.bits_per_sample());
   ASSERT_EQ(content, re_read_content);
 }
-
 
 void XOR(char* data, size_t size) {
   for (size_t idx = 0; idx < size; idx++) {
@@ -196,11 +194,11 @@ void XOR(char* data, size_t size) {
 TEST(Wave, ReadWriteXOR) {
   using namespace wave;
   std::error_code err;
-  
+
   File read_file;
   read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
   auto content = read_file.Read(err);
-  
+
   // write with xor
   {
     File write_file;
@@ -209,16 +207,16 @@ TEST(Wave, ReadWriteXOR) {
     write_file.set_bits_per_sample(read_file.bits_per_sample());
     write_file.set_channel_number(read_file.channel_number());
     write_file.Write(content, XOR);
-    
+
     ASSERT_FALSE(err);
   }
-  
+
   // re read
   File re_read_file;
   re_read_file.Open(gResourcePath + "/output.wav", OpenMode::kIn);
   std::vector<float> re_read_content;
   re_read_file.Read(XOR, &re_read_content);
-  
+
   ASSERT_FALSE(err);
   ASSERT_EQ(read_file.channel_number(), re_read_file.channel_number());
   ASSERT_EQ(read_file.sample_rate(), re_read_file.sample_rate());
@@ -226,4 +224,83 @@ TEST(Wave, ReadWriteXOR) {
   ASSERT_EQ(read_file.bits_per_sample(), re_read_file.bits_per_sample());
   ASSERT_EQ(content, re_read_content);
 }
+
+TEST(Wave, SeekIn) {
+  using namespace wave;
+
+  File read_file;
+  read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
+  std::vector<float> reference;
+  read_file.Read(&reference);
+
+  File read_seek;
+  read_seek.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
+  std::vector<float> p1;
+  read_seek.Read(20, &p1);
+  ASSERT_EQ(read_seek.Tell(), 20);
+
+  // check p1 is 20 first frames of reference
+  for (size_t idx = 0; idx < p1.size(); idx++) {
+    ASSERT_EQ(p1[idx], reference[idx]);
+  }
+
+  uint64_t first_frame_idx = 10;
+  read_seek.Seek(first_frame_idx);
+  ASSERT_EQ(read_seek.Tell(), first_frame_idx);
+  std::vector<float> p2;
+  read_seek.Read(20, &p2);
+  ASSERT_EQ(read_seek.Tell(), 30);
+  // check that p2 is frame 10 to 30 of reference
+  auto first_sample_idx = first_frame_idx * read_file.channel_number();
+  for (size_t idx = 0; idx < p2.size(); idx++) {
+    ASSERT_EQ(p2[idx], reference[idx + first_sample_idx]);
+  }
+}
+
+TEST(Wave, SeekOut) {
+  using namespace wave;
+  
+  File read_file;
+  read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
+  std::vector<float> p1, p2;
+  // read first 20
+  read_file.Read(20, &p1);
+  ASSERT_EQ(read_file.Tell(), 20);
+  //read another 20 frames
+  read_file.Read(20, &p2);
+  ASSERT_EQ(read_file.Tell(), 40);
+  
+  {
+    File write_file;
+    write_file.Open(gResourcePath + "/output.wav", OpenMode::kOut);
+    write_file.set_sample_rate(read_file.sample_rate());
+    write_file.set_bits_per_sample(read_file.bits_per_sample());
+    write_file.set_channel_number(read_file.channel_number());
+    // write
+    write_file.Write(p1);
+    ASSERT_EQ(write_file.Tell(), 20);
+    // seek back 10 frames
+    write_file.Seek(10);
+    ASSERT_EQ(write_file.Tell(), 10);
+    // write another 20
+    write_file.Write(p2);
+    ASSERT_EQ(write_file.Tell(), 30);
+  }
+  
+  // re read file
+  File re_read_file;
+  re_read_file.Open(gResourcePath + "/output.wav", OpenMode::kIn);
+  std::vector<float> re_read_content;
+  re_read_file.Read(&re_read_content);
+  
+  // check content
+  for (size_t idx=0; idx < re_read_content.size(); idx++) {
+    if (idx < 10 * read_file.channel_number()) {
+      ASSERT_EQ(p1[idx], re_read_content[idx]);
+    } else {
+      ASSERT_EQ(p2[idx - 10 * read_file.channel_number()], re_read_content[idx]);
+    }
+  }
+}
+
 #endif  // __cplusplus > 199711L

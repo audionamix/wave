@@ -97,9 +97,22 @@ class File::Impl {
     } else if (istream.is_open()) {
       data_index = static_cast<uint64_t>(istream.tellg()) - sizeof(WAVEHeader);
     } else {
-      return kNotOpen;
+      return 0;
     }
     return data_index / bytes_per_sample;
+  }
+
+  void set_current_sample_index(uint64_t sample_idx) {
+    auto bits_per_sample = header.fmt.bits_per_sample;
+    auto bytes_per_sample = bits_per_sample / 8;
+
+    std::streampos stream_index =
+        sizeof(WAVEHeader) + (sample_idx * bytes_per_sample);
+    if (ostream.is_open()) {
+      ostream.seekp(stream_index);
+    } else if (istream.is_open()) {
+      istream.seekg(stream_index);
+    }
   }
 
   uint64_t sample_number() {
@@ -261,6 +274,27 @@ Error File::Write(const std::vector<float>& data,
   return kNoError;
 }
 
+Error File::Seek(uint64_t frame_index) {
+  if (!impl_->ostream.is_open() && !impl_->istream.is_open()) {
+    return kNotOpen;
+  }
+  if (frame_index > frame_number()) {
+    return kInvalidSeek;
+  }
+
+  impl_->set_current_sample_index(frame_index * channel_number());
+  return kNoError;
+}
+
+uint64_t File::Tell() const {
+  if (!impl_->ostream.is_open() && !impl_->istream.is_open()) {
+    return 0;
+  }
+
+  auto sample_position = impl_->current_sample_index();
+  return sample_position / channel_number();
+}
+
 #if __cplusplus > 199711L
 
 std::error_code make_error_code(Error err) {
@@ -298,6 +332,7 @@ void File::Write(const std::vector<float>& data, std::error_code& err) {
   auto wave_error = Write(data);
   err = make_error_code(wave_error);
 }
+
 #endif  // __cplusplus > 199711L
 
 }  // namespace wave

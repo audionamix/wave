@@ -22,7 +22,8 @@ enum Error {
   kNotOpen,
   kInvalidFormat,
   kWriteError,
-  kReadError
+  kReadError,
+  kInvalidSeek
 };
 
 class File {
@@ -69,6 +70,16 @@ class File {
    */
   Error Write(const std::vector<float>& data,
               void (*encrypt)(char* data, size_t size));
+  
+  /**
+   * Move to the given frame in the file
+   */
+  Error Seek(uint64_t frame_index);
+  
+  /**
+   * Give the current frame position in the file
+   */
+  uint64_t Tell() const;
 
 #if __cplusplus > 199711L
   // Modern C++ interface
@@ -88,7 +99,7 @@ class File {
   void set_bits_per_sample(uint16_t bits_per_sample);
 
   uint64_t frame_number() const;
-
+  
  private:
   class Impl;
   Impl* impl_;

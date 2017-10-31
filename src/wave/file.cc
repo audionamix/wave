@@ -7,6 +7,8 @@
 
 #include "wave/headers.h"
 
+#define INT24_MAX 8388607
+
 namespace wave {
 
 namespace internal {
@@ -216,6 +218,19 @@ Error File::Read(uint64_t frame_number, void (*decrypt)(char*, size_t),
       decrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       (*output)[sample_idx] =
           static_cast<float>(value) / std::numeric_limits<int16_t>::max();
+    } else if (impl_->header.fmt.bits_per_sample == 24) {
+      // 24bits int doesn't exist in c++. We create a 3 * 8bits struct to simulate
+      unsigned char value[3];
+      impl_->istream.read(reinterpret_cast<char*>(&value), sizeof(value));
+      decrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
+      int integer_value;
+      // check if value is negative
+      if ( value[2] & 0x80 ) {
+        integer_value = (0xff << 24) | (value[2] << 16) | (value[1] << 8) | (value[0] << 0);
+      } else {
+        integer_value = (value[2] << 16) | (value[1] << 8) | (value[0] << 0);
+      }
+      (*output)[sample_idx] = static_cast<float>(integer_value) / INT24_MAX;
     } else if (impl_->header.fmt.bits_per_sample == 32) {
       // 32bits
       int32_t value;
@@ -255,6 +270,16 @@ Error File::Write(const std::vector<float>& data,
       // 16 bits
       int16_t value =
           static_cast<int16_t>(sample * std::numeric_limits<int16_t>::max());
+      encrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
+      impl_->ostream.write(reinterpret_cast<char*>(&value), sizeof(value));
+    } else if (bits_per_sample == 24) {
+      // 24bits int doesn't exist in c++. We create a 3 * 8bits struct to simulate
+      int v = sample * INT24_MAX;
+      int8_t value[3];
+      value[0] = reinterpret_cast<char*>(&v)[0];
+      value[1] = reinterpret_cast<char*>(&v)[1];
+      value[2] = reinterpret_cast<char*>(&v)[2];
+      
       encrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       impl_->ostream.write(reinterpret_cast<char*>(&value), sizeof(value));
     } else if (bits_per_sample == 32) {

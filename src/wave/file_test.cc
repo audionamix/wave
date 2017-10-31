@@ -135,6 +135,39 @@ TEST(Wave, ChunkWrite) {
   ASSERT_EQ(content, re_read_content);
 }
 
+TEST(Wave, Write24bits) {
+  using namespace wave;
+  
+  // tested above
+  File read_file;
+  read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
+  std::vector<float> content;
+  read_file.Read(&content);
+  
+  {
+    File write_file;
+    write_file.Open(gResourcePath + "/output.wav", OpenMode::kOut);
+    write_file.set_sample_rate(read_file.sample_rate());
+    write_file.set_bits_per_sample(24);
+    write_file.set_channel_number(read_file.channel_number());
+    write_file.Write(content);
+  }
+  
+  // re read
+  File re_read_file;
+  re_read_file.Open(gResourcePath + "/output.wav", OpenMode::kIn);
+  std::vector<float> re_read_content;
+  re_read_file.Read(&re_read_content);
+
+  ASSERT_EQ(read_file.channel_number(), re_read_file.channel_number());
+  ASSERT_EQ(read_file.sample_rate(), re_read_file.sample_rate());
+  ASSERT_EQ(read_file.channel_number(), re_read_file.channel_number());
+  ASSERT_EQ(re_read_file.bits_per_sample(), 24);
+  for (int i = 0; i < read_file.frame_number(); i++) {
+    ASSERT_LT(fabs(content[i] - re_read_content[i]), pow(10, -6));
+  }
+}
+
 #if __cplusplus > 199711L
 TEST(Wave, ReadModern) {
   using namespace wave;

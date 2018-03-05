@@ -13,7 +13,7 @@ build_script:
   - cmake --build .
 
 test_script:
-  - cmd: C:/projects/wave/build/src/wave/Debug/wave_test.exe --gtest_output=xml:tests.xml
+  - cmd: C:/projects/wave/build/src/wave/Debug/wave_tests.exe --gtest_output=xml:tests.xml
 
 after_test:
    - ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\tests.xml))

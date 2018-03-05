@@ -17,24 +17,33 @@ install(FILES
 
 # tests
 if (${wave_enable_tests})
+  include(GoogleTest)
   add_executable(wave_tests
     ${src}/wave/file_test.cc
   )
-  add_dependencies(wave_tests googletest)
+
+  add_dependencies(wave_tests 
+  external_googletest)
+
   if (UNIX AND NOT APPLE)
     target_link_libraries(wave_tests
-      gtest
-      gtest_main
       wave
       pthread
+      gtest
+      gtest_main
     )
   else()
     target_link_libraries(wave_tests
-      gtest
-      gtest_main
+      optimized gtest
+      optimized gtest_main
+      debug gtestd
+      debug gtest_maind
       wave
     )
   endif()
+
+  gtest_discover_tests( wave_tests )
+
   target_include_directories(wave_tests
     PUBLIC
       ${gtest_install_dir}/include

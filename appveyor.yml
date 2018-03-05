@@ -1,22 +1,22 @@
-version: 0.4.{build}a
+version: 1.0.{build}
 
-branches:
-  only:
-  - master
-
-before_build:
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/build/install ..
+image:
+  - Visual Studio 2015
+  - Visual Studio 2017
+init:
+  #- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 build_script:
-  - cd %APPVEYOR_BUILD_FOLDER%
+  - mkdir build
   - cd build
+  - cmake ..
   - cmake --build .
-  - cmake --build . --target install --config Release
 
 test_script:
-  - cmd /c %APPVEYOR_BUILD_FOLDER%/build/src/wave/Debug/wave_tests.exe
+  - cmd: C:/projects/wave/build/src/wave/Debug/wave_test.exe --gtest_output=xml:tests.xml
 
-artifacts:
-  - path: build/install
+after_test:
+   - ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\tests.xml))
+
+on_finish:
+  #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

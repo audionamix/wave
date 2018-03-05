@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 
 include(ExternalProject)
-project(wave)
+project(wave CXX)
+include(CTest)
 
 # build options
 option(wave_enable_tests "Build Unit tests" ON)
@@ -11,19 +12,19 @@ if (NOT CMAKE_OSX_DEPLOYMENT_TARGET)
   # use of c++14
   set(CMAKE_CXX_STANDARD 14)
 endif()
+if(wave_enable_tests)
 
-if (${wave_enable_tests})
-  enable_testing()
-
-  set(gtest_install_dir ${CMAKE_BINARY_DIR}/googletest-install)
-  ExternalProject_Add(googletest
+  set(gtest_install_dir ${CMAKE_BINARY_DIR}/gtest-install)
+  ExternalProject_Add(external_googletest
     GIT_REPOSITORY "https://github.com/google/googletest.git"
-    GIT_TAG "release-1.8.0"
+    UPDATE_COMMAND ""
     CMAKE_ARGS
       "-Dgtest_force_shared_crt=ON"
       "-DCMAKE_INSTALL_PREFIX=${gtest_install_dir}"
   )
   link_directories("${gtest_install_dir}/lib")
+
+  set(GTEST_ROOT "${gtest_install_dir}" CACHE PATH "Path to googletest")
 
   # download test resource from https://archive.org/details/test_wav
   set(test_resource_path "${CMAKE_BINARY_DIR}/test_resource")

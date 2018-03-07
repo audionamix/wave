@@ -5,6 +5,11 @@ notifications:
     incoming_webhook:
       secure: 8vJggT7SJy5OBS7Z5kuauu+M0FiD/1trTrPo/VbheNrEB8eF4JLnz7v9ihMHX3tZr+nLNKhKrTNMQLGlDkndrD/Qk+dh3TxWvrbdfEw9RKs=
 
+branches:
+  only:
+    - /.*/
+
+
 image:
   - Visual Studio 2015
   - Visual Studio 2017

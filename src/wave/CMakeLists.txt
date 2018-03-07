@@ -23,7 +23,7 @@ if (${wave_enable_tests})
   )
 
   add_dependencies(wave_tests 
-  external_googletest)
+    external_googletest)
 
   if (UNIX AND NOT APPLE)
     target_link_libraries(wave_tests

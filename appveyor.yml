@@ -2,8 +2,8 @@ version: 1.0.{build}
 
 notifications:
   - provider: Slack
-  incoming_webhook:
-    secure: 8vJggT7SJy5OBS7Z5kuauu+M0FiD/1trTrPo/VbheNrEB8eF4JLnz7v9ihMHX3tZr+nLNKhKrTNMQLGlDkndrD/Qk+dh3TxWvrbdfEw9RKs=
+    incoming_webhook:
+      secure: 8vJggT7SJy5OBS7Z5kuauu+M0FiD/1trTrPo/VbheNrEB8eF4JLnz7v9ihMHX3tZr+nLNKhKrTNMQLGlDkndrD/Qk+dh3TxWvrbdfEw9RKs=
 
 image:
   - Visual Studio 2015

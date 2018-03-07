@@ -1,8 +1,10 @@
 dist: trusty
-
+notifications:
+  slack:
+    rooms:
+      secure: LbvOjYskriWt0fLiVhol1dVeQvOv1x+RlTu+FLGQdB7LV+tBHhVsW3a4S1TSck5dZkHUN4l/cP5jlQLR1LFXgA5f6i+R/SUYWnOwfMJvqG9Fhfeqr0sHh0qi5KEThRIXc+LeqOAI5ZBha6Q5tqJv9f9BBFDimuyfCuPGhBfTHxAcsQeoKYC85drOLTMMPFQZF1plyAEtfppnD/ZxbGZcDyd2n7xddHXZLNGRjCE+5MsJeMDwZz2dizNstxV87HdLDrXGPgTgsc2xOxNgdqi/a5PIwij1ikMeMAgvONhr+eNQ9PQdNzqSBGn83H0qhej8758EeFQnJ/1pyt4ROyUpcQJcczzcMRpUkhM3Mawr0fQR0YMuVd5HxYL8STc5eXBk59lulxAYA93V3QkAkjXbRCCb2TQSfbIHmfbAzKJowsLkrzta+5pNd+iQMjaiknbkxnWsRsGboL2VX9VEOEyyqoISgyXbPzZRKPrciSjmDutorZmTh994E2EvYi030If/NzuWe/hYDsCGY2Pgz8HA3XHs7hX7gXdsDpnDdqdLSWxjXXzOjnymPEkPledQx4g0ZGwEUp/VaOucSXNoil3JiL6qNmMTUzkXXqUdlMbmZ15N6+BnY+DwL3vcR5mDvKzIGyd+6pNbgtr57mU11hRwIXNRkuviwHaA+xfNqKJqGxY=
 language:
   - cpp
-
 addons:
   apt:
     sources:
@@ -12,11 +14,10 @@ addons:
       - cmake
       - cmake-data
       - g++-5
-
 script:
   - mkdir build
   - cd build
   - cmake -DCMAKE_INSTALL_PREFIX=$PWD/install ..
   - make
-  - ./src/wave/wave_tests
+  - "./src/wave/wave_tests"
   - make install

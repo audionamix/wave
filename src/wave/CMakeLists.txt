@@ -42,7 +42,7 @@ if (${wave_enable_tests})
     )
   endif()
 
-  gtest_discover_tests( wave_tests )
+  gtest_add_tests( wave_tests )
 
   target_include_directories(wave_tests
     PUBLIC

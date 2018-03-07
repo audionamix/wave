@@ -27,12 +27,12 @@ if (${wave_enable_tests})
 
   if (UNIX AND NOT APPLE)
     target_link_libraries(wave_tests
-      wave
-      pthread
       gtest
       gtest_main
+      wave
+      pthread
     )
-  else()
+  elseif(WIN32)
     target_link_libraries(wave_tests
       optimized gtest
       optimized gtest_main
@@ -40,6 +40,12 @@ if (${wave_enable_tests})
       debug gtest_maind
       wave
     )
+  else()
+    target_link_libraries(wave_tests
+      gtest
+      gtest_main
+      wave
+    )  
   endif()
 
   gtest_add_tests(TARGET wave_tests )

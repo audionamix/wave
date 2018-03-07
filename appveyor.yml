@@ -6,8 +6,9 @@ notifications:
       secure: 8vJggT7SJy5OBS7Z5kuauu+M0FiD/1trTrPo/VbheNrEB8eF4JLnz7v9ihMHX3tZr+nLNKhKrTNMQLGlDkndrD/Qk+dh3TxWvrbdfEw9RKs=
 
 image:
-  - Visual Studio 2015
+  #- Visual Studio 2015
   - Visual Studio 2017
+  - Ubuntu
 init:
   #- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
@@ -19,6 +20,7 @@ build_script:
 
 test_script:
   - cmd: C:/projects/wave/build/src/wave/Debug/wave_tests.exe --gtest_output=xml:tests.xml
+  - sh : "./src/wave/wave_tests --gtest_output=xml:tests.xml"
 
 after_test:
    - ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\tests.xml))

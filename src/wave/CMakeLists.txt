@@ -22,8 +22,9 @@ if (${wave_enable_tests})
     ${src}/wave/file_test.cc
   )
 
-  add_dependencies(wave_tests 
-    external_googletest)
+  add_dependencies(wave_tests
+    external_googletest
+  )
 
   if (UNIX AND NOT APPLE)
     target_link_libraries(wave_tests
@@ -42,10 +43,12 @@ if (${wave_enable_tests})
     )
   else()
     target_link_libraries(wave_tests
-      gtest
-      gtest_main
+      optimized gtest
+      optimized gtest_main
+      debug gtestd
+      debug gtest_maind
       wave
-    )  
+    )
   endif()
 
   gtest_add_tests(TARGET wave_tests )

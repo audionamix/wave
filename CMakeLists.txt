@@ -17,13 +17,13 @@ if(wave_enable_tests)
   set(gtest_install_dir ${CMAKE_BINARY_DIR}/gtest-install)
   ExternalProject_Add(external_googletest
     GIT_REPOSITORY "https://github.com/google/googletest.git"
+    GIT_TAG "718fd88d8f145c63b8cc134cf8fed92743cc112f"  # commit fixing visual studio 2017 errors
     UPDATE_COMMAND ""
     CMAKE_ARGS
       "-Dgtest_force_shared_crt=ON"
       "-DCMAKE_INSTALL_PREFIX=${gtest_install_dir}"
   )
   link_directories("${gtest_install_dir}/lib")
-
   set(GTEST_ROOT "${gtest_install_dir}" CACHE PATH "Path to googletest")
 
   # download test resource from https://archive.org/details/test_wav

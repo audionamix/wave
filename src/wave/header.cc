@@ -8,18 +8,18 @@ namespace wave {
     if (!stream->is_open()) {
       return Error::kNotOpen;
     }
-    
+
     // read chunk ID
-    auto chunk_id_size = 4;
+    const auto chunk_id_size = 4;
     stream->seekg(position_, std::ios::beg);
     char result[chunk_id_size];
     stream->read(result, chunk_id_size * sizeof(char));
     id_ = std::string(result, chunk_id_size);
-    
+
     // and size
     stream->read(reinterpret_cast<char*>(&size_), sizeof(uint32_t));
     size_ += chunk_id_size * sizeof(char) + sizeof(uint32_t);
-    
+
     return Error::kNoError;
   }
 

@@ -12,19 +12,11 @@
 
 #include <stdint.h>
 
+#include "wave/error.h"
+
 namespace wave {
 
 enum OpenMode { kIn, kOut };
-
-enum Error {
-  kNoError,
-  kFailedToOpen,
-  kNotOpen,
-  kInvalidFormat,
-  kWriteError,
-  kReadError,
-  kInvalidSeek
-};
 
 class File {
  public:

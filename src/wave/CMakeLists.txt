@@ -13,6 +13,7 @@ add_library(wave
   ${src}/wave/header_list.h
   ${src}/wave/header_list.cc
 
+  ${src}/wave/error.h
   ${src}/wave/file.h
   ${src}/wave/file.cc
 )

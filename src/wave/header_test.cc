@@ -8,11 +8,8 @@ TEST(Header, List) {
   using namespace wave;
   std::string path(gResourcePath + "/extra-header.wav");
 
-  std::shared_ptr<std::ifstream> stream = std::make_shared<std::ifstream>();
-  stream->open(path.c_str(), std::ios::binary);
-
-  HeaderList list(stream);
-  
+  HeaderList list;
+  ASSERT_EQ(list.Init(path), Error::kNoError);
   for (auto header : list) {
     std::cout << header.chunk_id() << " " << header.chunk_size() << std::endl;
   }

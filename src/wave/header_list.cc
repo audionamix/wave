@@ -2,8 +2,7 @@
 
 namespace wave {
 
-HeaderList::Iterator::Iterator(std::ifstream* stream,
-                               uint64_t position)
+HeaderList::Iterator::Iterator(std::ifstream* stream, uint64_t position)
     : stream_(stream), position_(position) {}
 
 HeaderList::Iterator HeaderList::Iterator::operator++() {
@@ -33,7 +32,7 @@ bool HeaderList::Iterator::operator==(const Iterator& rhs) {
 bool HeaderList::Iterator::operator!=(const Iterator& rhs) {
   return !operator==(rhs);
 }
-  
+
 Error HeaderList::Init(const std::string& path) {
   stream_.open(path.c_str(), std::ios::binary);
   if (!stream_.is_open()) {
@@ -52,5 +51,19 @@ HeaderList::Iterator HeaderList::end() {
   stream_.seekg(0, std::ios::beg);
   return HeaderList::Iterator(&stream_, size);
 }
+
+Header HeaderList::header(const std::string& header_id) {
+  for (auto iterator = begin(); iterator != end(); iterator++) {
+    auto header = *iterator;
+    if (header.chunk_id() == header_id) {
+      return header;
+    }
+  }
+  return *begin();
+}
+
+Header HeaderList::riff() { return header("RIFF"); }
+Header HeaderList::fmt() { return header("fmt "); }
+Header HeaderList::data() { return header("data"); }
 
 }  // namespace wave

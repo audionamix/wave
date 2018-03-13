@@ -66,7 +66,13 @@ class File::Impl {
     data_offset_ = sizeof(WAVEHeader);
     return kNoError;
   }
-
+  
+  template <typename T>
+  void ReadHeader(Header generic_header, T* output) {
+    istream.seekg(generic_header.position(), std::ios::beg);
+    istream.read(reinterpret_cast<char*>(output), sizeof(T));
+  }
+  
   Error ReadHeader(HeaderList* headers) {
     if (!istream.is_open()) {
       return kNotOpen;
@@ -78,26 +84,14 @@ class File::Impl {
       return kInvalidFormat;
     }
     istream.seekg(0, std::ios::beg);
-
-    // read each headers
-    for (auto header_iterator = headers->begin();
-         header_iterator != headers->end(); header_iterator++) {
-      auto wav_header = *header_iterator;
-      istream.seekg(wav_header.position(), std::ios::beg);
-      if (wav_header.chunk_id() == "RIFF") {
-        istream.read(reinterpret_cast<char*>(&(header.riff)),
-                     sizeof(RIFFHeader));
-      } else if (wav_header.chunk_id() == "fmt ") {
-        istream.read(reinterpret_cast<char*>(&(header.fmt)), sizeof(FMTHeader));
-      } else if (wav_header.chunk_id() == "data") {
-        istream.read(reinterpret_cast<char*>(&(header.data)),
-                     sizeof(DataHeader));
-
-        // data offset is right data header's ID and size
-        data_offset_ = wav_header.position() + sizeof(wav_header.chunk_size()) +
-                       (wav_header.chunk_id().size() * sizeof(char));
-      }
-    }
+    
+    // read headers
+    ReadHeader(headers->riff(), &header.riff);
+    ReadHeader(headers->fmt(), &header.fmt);
+    ReadHeader(headers->data(), &header.data);
+    // data offset is right after data header's ID and size
+    auto data_header = headers->data();
+    data_offset_ = data_header.position() + sizeof(data_header.chunk_size()) + (data_header.chunk_id().size() * sizeof(char));
 
     // check headers ids (make sure they are set)
     if (std::string(header.riff.chunk_id, 4) != "RIFF") {

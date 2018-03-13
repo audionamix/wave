@@ -26,7 +26,13 @@ class HeaderList {
   Error Init(const std::string& path);
   Iterator begin();
   Iterator end();
+  
+  Header riff();
+  Header fmt();
+  Header data();
+  
  private:
+  Header header(const std::string& header_id);
   std::ifstream stream_;
 };
 }  // namespace wave

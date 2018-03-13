@@ -20,13 +20,17 @@ TEST(Header, List) {
   
   iterator++;
   ASSERT_EQ((*iterator).chunk_id(), "fmt ");
-  ASSERT_EQ((*iterator).chunk_size(), 38);
+  ASSERT_EQ((*iterator).chunk_size(), 24);
   
   iterator++;
-  ASSERT_EQ((*iterator).chunk_id(), "fact");
-  ASSERT_EQ((*iterator).chunk_size(), 12);
+  ASSERT_EQ((*iterator).chunk_id(), "cue ");
+  ASSERT_EQ((*iterator).chunk_size(), 60);
   
   iterator++;
   ASSERT_EQ((*iterator).chunk_id(), "data");
-  ASSERT_EQ((*iterator).chunk_size(), 68228);
+  ASSERT_EQ((*iterator).chunk_size(), 38725764);
+  
+  iterator++;
+  ASSERT_EQ((*iterator).chunk_id(), "bext");
+  ASSERT_EQ((*iterator).chunk_size(), 866);
 }

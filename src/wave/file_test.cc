@@ -338,6 +338,21 @@ TEST(Wave, SeekOut) {
   }
 }
 
+TEST(Wave, ExtraHeaders) {
+  using namespace wave;
+  File file;
+  ASSERT_EQ(file.Open(gResourcePath + "/extra-header.wav", OpenMode::kIn), Error::kNoError);
+  
+  std::error_code err;
+  auto data = file.Read(err);
+  ASSERT_FALSE(err);
+  File write_file;
+  write_file.Open(gResourcePath + "/extra-header-out.wav", OpenMode::kOut);
+  write_file.set_channel_number(file.channel_number());
+  write_file.set_sample_rate(file.sample_rate());
+  write_file.Write(data);
+}
+
 #endif  // __cplusplus > 199711L
 
 TEST(Wave, FormatError) {

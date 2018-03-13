@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/audionamix/wave.svg?branch=master)](https://travis-ci.org/audionamix/wave)
-[![Build status](https://ci.appveyor.com/api/projects/status/7pqh879hbw9tehds?svg=true)](https://ci.appveyor.com/project/gvne/wave)
+[![Build status](https://ci.appveyor.com/api/projects/status/51nr7xmm1fc9nb0n?svg=true)](https://ci.appveyor.com/project/Audionamix/wave)
 
 
 ## Libwave

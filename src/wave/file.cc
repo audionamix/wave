@@ -5,7 +5,10 @@
 #include <limits>
 #include <iostream>
 
-#include "wave/headers.h"
+#include "wave/header/riff_header.h"
+#include "wave/header/fmt_header.h"
+#include "wave/header/data_header.h"
+#include "wave/header/wave_header.h"
 
 #define INT24_MAX 8388607
 

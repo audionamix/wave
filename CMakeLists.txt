@@ -30,7 +30,7 @@ if(wave_enable_tests)
   set(test_resource_path "${CMAKE_BINARY_DIR}/test_resource")
   file(MAKE_DIRECTORY "${test_resource_path}")
   file(DOWNLOAD "https://archive.org/download/test_wav/Untitled3.wav" "${test_resource_path}/Untitled3.wav")
-
+  file(DOWNLOAD "http://wav-sounds.com/wp-content/uploads/2017/09/Answer-02.wav" "${test_resource_path}/extra-header.wav")
   # Download wikipedia's different format wave https://en.wikipedia.org/wiki/WAV
   set(test_file_list
     11k16bitpcm.wav

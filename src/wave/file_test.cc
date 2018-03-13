@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <fstream>
 #include <iostream>
 
 #include "wave/file.h"
@@ -137,13 +138,13 @@ TEST(Wave, ChunkWrite) {
 
 TEST(Wave, Write24bits) {
   using namespace wave;
-  
+
   // tested above
   File read_file;
   read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
   std::vector<float> content;
   read_file.Read(&content);
-  
+
   {
     File write_file;
     write_file.Open(gResourcePath + "/output.wav", OpenMode::kOut);
@@ -152,7 +153,7 @@ TEST(Wave, Write24bits) {
     write_file.set_channel_number(read_file.channel_number());
     write_file.Write(content);
   }
-  
+
   // re read
   File re_read_file;
   re_read_file.Open(gResourcePath + "/output.wav", OpenMode::kIn);
@@ -292,17 +293,17 @@ TEST(Wave, SeekIn) {
 
 TEST(Wave, SeekOut) {
   using namespace wave;
-  
+
   File read_file;
   read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
   std::vector<float> p1, p2;
   // read first 20
   read_file.Read(20, &p1);
   ASSERT_EQ(read_file.Tell(), 20);
-  //read another 20 frames
+  // read another 20 frames
   read_file.Read(20, &p2);
   ASSERT_EQ(read_file.Tell(), 40);
-  
+
   {
     File write_file;
     write_file.Open(gResourcePath + "/output.wav", OpenMode::kOut);
@@ -319,19 +320,20 @@ TEST(Wave, SeekOut) {
     write_file.Write(p2);
     ASSERT_EQ(write_file.Tell(), 30);
   }
-  
+
   // re read file
   File re_read_file;
   re_read_file.Open(gResourcePath + "/output.wav", OpenMode::kIn);
   std::vector<float> re_read_content;
   re_read_file.Read(&re_read_content);
-  
+
   // check content
-  for (size_t idx=0; idx < re_read_content.size(); idx++) {
+  for (size_t idx = 0; idx < re_read_content.size(); idx++) {
     if (idx < 10 * read_file.channel_number()) {
       ASSERT_EQ(p1[idx], re_read_content[idx]);
     } else {
-      ASSERT_EQ(p2[idx - 10 * read_file.channel_number()], re_read_content[idx]);
+      ASSERT_EQ(p2[idx - 10 * read_file.channel_number()],
+                re_read_content[idx]);
     }
   }
 }

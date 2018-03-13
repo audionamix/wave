@@ -26,6 +26,7 @@ install(TARGETS wave
 )
 install(FILES
   ${src}/wave/file.h
+  ${src}/wave/error.h
   DESTINATION include/wave
 )
 

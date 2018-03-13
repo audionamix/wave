@@ -339,3 +339,9 @@ TEST(Wave, SeekOut) {
 }
 
 #endif  // __cplusplus > 199711L
+
+TEST(Wave, FormatError) {
+  using namespace wave;
+  File file;
+  ASSERT_EQ(file.Open(gResourcePath + "/8kulaw.wav", OpenMode::kIn), Error::kInvalidFormat);
+}

@@ -5,6 +5,7 @@
 #include <limits>
 #include <iostream>
 
+#include "wave/header_list.h"
 #include "wave/header/riff_header.h"
 #include "wave/header/fmt_header.h"
 #include "wave/header/data_header.h"
@@ -18,6 +19,14 @@ namespace internal {
 void NoEncrypt(char* data, size_t size) {}
 void NoDecrypt(char* data, size_t size) {}
 }  // namespace internal
+  
+enum Format {
+  WAVE_FORMAT_PCM = 0x0001,
+  WAVE_FORMAT_IEEE_FLOAT = 0x0003,
+  WAVE_FORMAT_ALAW  = 0x0006,
+  WAVE_FORMAT_MULAW = 0x0007,
+  WAVE_FORMAT_EXTENSIBLE = 0xFFFE
+};
 
 class File::Impl {
  public:
@@ -52,10 +61,13 @@ class File::Impl {
     if (ostream.tellp() < original_position) {
       ostream.seekp(original_position);
     }
+
+    // the offset of data will be right after the headers
+    data_offset_ = sizeof(WAVEHeader);
     return kNoError;
   }
 
-  Error ReadHeader() {
+  Error ReadHeader(HeaderList* headers) {
     if (!istream.is_open()) {
       return kNotOpen;
     }
@@ -66,12 +78,28 @@ class File::Impl {
       return kInvalidFormat;
     }
     istream.seekg(0, std::ios::beg);
-    istream.read(reinterpret_cast<char*>(&header), sizeof(WAVEHeader));
-    if (istream.fail()) {
-      return kReadError;
+
+    // read each headers
+    for (auto header_iterator = headers->begin();
+         header_iterator != headers->end(); header_iterator++) {
+      auto wav_header = *header_iterator;
+      istream.seekg(wav_header.position(), std::ios::beg);
+      if (wav_header.chunk_id() == "RIFF") {
+        istream.read(reinterpret_cast<char*>(&(header.riff)),
+                     sizeof(RIFFHeader));
+      } else if (wav_header.chunk_id() == "fmt ") {
+        istream.read(reinterpret_cast<char*>(&(header.fmt)), sizeof(FMTHeader));
+      } else if (wav_header.chunk_id() == "data") {
+        istream.read(reinterpret_cast<char*>(&(header.data)),
+                     sizeof(DataHeader));
+
+        // data offset is right data header's ID and size
+        data_offset_ = wav_header.position() + sizeof(wav_header.chunk_size()) +
+                       (wav_header.chunk_id().size() * sizeof(char));
+      }
     }
 
-    // check headers ids
+    // check headers ids (make sure they are set)
     if (std::string(header.riff.chunk_id, 4) != "RIFF") {
       return kInvalidFormat;
     }
@@ -90,6 +118,12 @@ class File::Impl {
     if (bps != 8 && bps != 16 && bps != 32) {
       return kInvalidFormat;
     }
+    
+    // And only support uncompressed PCM format
+    if (header.fmt.audio_format != Format::WAVE_FORMAT_PCM) {
+      return kInvalidFormat;
+    }
+    
     return kNoError;
   }
 
@@ -98,9 +132,9 @@ class File::Impl {
     auto bytes_per_sample = bits_per_sample / 8;
     uint64_t data_index = 0;
     if (ostream.is_open()) {
-      data_index = static_cast<uint64_t>(ostream.tellp()) - sizeof(WAVEHeader);
+      data_index = static_cast<uint64_t>(ostream.tellp()) - data_offset_;
     } else if (istream.is_open()) {
-      data_index = static_cast<uint64_t>(istream.tellg()) - sizeof(WAVEHeader);
+      data_index = static_cast<uint64_t>(istream.tellg()) - data_offset_;
     } else {
       return 0;
     }
@@ -112,7 +146,7 @@ class File::Impl {
     auto bytes_per_sample = bits_per_sample / 8;
 
     std::streampos stream_index =
-        sizeof(WAVEHeader) + (sample_idx * bytes_per_sample);
+        data_offset_ + (sample_idx * bytes_per_sample);
     if (ostream.is_open()) {
       ostream.seekp(stream_index);
     } else if (istream.is_open()) {
@@ -131,6 +165,7 @@ class File::Impl {
   std::ifstream istream;
   std::ofstream ostream;
   WAVEHeader header;
+  uint64_t data_offset_;
 };
 
 File::File() : impl_(new Impl()) { impl_->header = MakeWAVEHeader(); }
@@ -154,7 +189,12 @@ Error File::Open(const std::string& path, OpenMode mode) {
   if (!impl_->istream.is_open()) {
     return Error::kFailedToOpen;
   }
-  return impl_->ReadHeader();
+  HeaderList headers;
+  auto error = headers.Init(path);
+  if (error != kNoError) {
+    return error;
+  }
+  return impl_->ReadHeader(&headers);
 }
 
 uint16_t File::channel_number() const { return impl_->header.fmt.num_channel; }
@@ -222,14 +262,16 @@ Error File::Read(uint64_t frame_number, void (*decrypt)(char*, size_t),
       (*output)[sample_idx] =
           static_cast<float>(value) / std::numeric_limits<int16_t>::max();
     } else if (impl_->header.fmt.bits_per_sample == 24) {
-      // 24bits int doesn't exist in c++. We create a 3 * 8bits struct to simulate
+      // 24bits int doesn't exist in c++. We create a 3 * 8bits struct to
+      // simulate
       unsigned char value[3];
       impl_->istream.read(reinterpret_cast<char*>(&value), sizeof(value));
       decrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       int integer_value;
       // check if value is negative
-      if ( value[2] & 0x80 ) {
-        integer_value = (0xff << 24) | (value[2] << 16) | (value[1] << 8) | (value[0] << 0);
+      if (value[2] & 0x80) {
+        integer_value =
+            (0xff << 24) | (value[2] << 16) | (value[1] << 8) | (value[0] << 0);
       } else {
         integer_value = (value[2] << 16) | (value[1] << 8) | (value[0] << 0);
       }
@@ -276,13 +318,14 @@ Error File::Write(const std::vector<float>& data,
       encrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       impl_->ostream.write(reinterpret_cast<char*>(&value), sizeof(value));
     } else if (bits_per_sample == 24) {
-      // 24bits int doesn't exist in c++. We create a 3 * 8bits struct to simulate
+      // 24bits int doesn't exist in c++. We create a 3 * 8bits struct to
+      // simulate
       int v = sample * INT24_MAX;
       int8_t value[3];
       value[0] = reinterpret_cast<char*>(&v)[0];
       value[1] = reinterpret_cast<char*>(&v)[1];
       value[2] = reinterpret_cast<char*>(&v)[2];
-      
+
       encrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       impl_->ostream.write(reinterpret_cast<char*>(&value), sizeof(value));
     } else if (bits_per_sample == 32) {

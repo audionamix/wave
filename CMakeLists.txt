@@ -12,8 +12,9 @@ if (NOT CMAKE_OSX_DEPLOYMENT_TARGET)
   # use of c++14
   set(CMAKE_CXX_STANDARD 14)
 endif()
-if(wave_enable_tests)
+set(CMAKE_DEBUG_POSTFIX d)  # add the d postfix to generated libraries
 
+if(wave_enable_tests)
   set(gtest_install_dir ${CMAKE_BINARY_DIR}/gtest-install)
   ExternalProject_Add(external_googletest
     GIT_REPOSITORY "https://github.com/google/googletest.git"

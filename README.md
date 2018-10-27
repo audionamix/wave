@@ -3,7 +3,7 @@
 
 
 ## Libwave
-A simple cross platform C++ interface for reading WAVE files.
+A simple cross platform C++ interface for reading and writing WAVE files.
 
 The WAVE file structure taken for reference is:
 

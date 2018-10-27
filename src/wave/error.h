@@ -4,7 +4,7 @@
 namespace wave {
 
 enum Error {
-  kNoError,
+  kNoError = 0,
   kFailedToOpen,
   kNotOpen,
   kInvalidFormat,

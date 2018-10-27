@@ -30,20 +30,20 @@ class File {
 
   /**
    * @brief Read the entire content of file.
-   * @note: File has to be opened in kOut mode of kNotOpen will be returned
+   * @note: File has to be opened in kOut mode or kNotOpen will be returned
    */
   Error Read(std::vector<float>* output);
 
   /**
    * @brief Read the given number of frames from file.
-   * @note: File has to be opened in kOut mode of kNotOpen will be returned.
+   * @note: File has to be opened in kOut mode or kNotOpen will be returned.
    * If file is too small, kInvalidFormat is returned
    */
   Error Read(uint64_t frame_number, std::vector<float>* output);
 
   /**
    * @brief Read and decrypt the entire content of file.
-   * @note: File has to be opened in kOut mode of kNotOpen will be returned
+   * @note: File has to be opened in kOut mode or kNotOpen will be returned
    */
   Error Read(void (*decrypt)(char* data, size_t size),
              std::vector<float>* output);
@@ -52,13 +52,13 @@ class File {
 
   /**
    * @brief Write the given data
-   * @note: File has to be opened in kIn mode of kNotOpen will be returned.
+   * @note: File has to be opened in kIn mode or kNotOpen will be returned.
    */
   Error Write(const std::vector<float>& data);
 
   /**
    * @brief Write and Encrypt using encryption function
-   * @note: File has to be opened in kIn mode of kNotOpen will be returned.
+   * @note: File has to be opened in kIn mode or kNotOpen will be returned.
    */
   Error Write(const std::vector<float>& data,
               void (*encrypt)(char* data, size_t size));

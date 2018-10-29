@@ -36,7 +36,7 @@ int main() {
 
   // write that same content to another file
   wave::File write_file;
-  write_file.Open("/home/gvne/test_write.wav", wave::kOut);
+  err = write_file.Open("/home/gvne/test_write.wav", wave::kOut);
   if (err) {
     std::cout << "Something went wrong in out open" << std::endl;
     return 3;

@@ -32,7 +32,6 @@ install(FILES
 
 # tests
 if (${wave_enable_tests})
-  include(GoogleTest)
   add_executable(wave_tests
     ${src}/wave/file_test.cc
     ${src}/wave/header_test.cc
@@ -66,8 +65,6 @@ if (${wave_enable_tests})
       wave
     )
   endif()
-
-  gtest_add_tests(TARGET wave_tests)
 
   target_include_directories(wave_tests
     PUBLIC

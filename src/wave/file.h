@@ -22,6 +22,7 @@ class File {
  public:
   File();
   ~File();
+  // File(const File& file);
 
   /**
    * @brief Open wave file at given path
@@ -75,6 +76,9 @@ class File {
 
 #if __cplusplus > 199711L
   // Modern C++ interface
+  File(File&& other);             // Move constructor
+  File& operator=(File&& other);  // Move assignement operator
+
   // TODO: add std::function version of Read and Write with encrypted
   std::vector<float> Read(std::error_code& err);
   std::vector<float> Read(uint64_t frame_number, std::error_code& err);
@@ -95,7 +99,11 @@ class File {
   
  private:
   class Impl;
+#if __cplusplus > 199711L
+  std::unique_ptr<Impl> impl_;
+#else // prior to
   Impl* impl_;
+#endif //  __cplusplus <= 199711L
 };
 }  // namespace wave
 

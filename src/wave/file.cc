@@ -30,6 +30,9 @@ enum Format {
 
 class File::Impl {
  public:
+  Impl() {}
+  ~Impl() {}
+
   Error WriteHeader(uint64_t data_size) {
     if (!ostream.is_open()) {
       return kNotOpen;
@@ -162,12 +165,16 @@ class File::Impl {
   uint64_t data_offset_;
 };
 
-File::File() : impl_(new Impl()) { impl_->header = MakeWAVEHeader(); }
+File::File() : impl_(new Impl()) {
+  impl_->header = MakeWAVEHeader();
+}
 File::~File() {
-  if (impl_->istream.is_open()) {
+  if (impl_ != nullptr && impl_->istream.is_open()) {
     impl_->ostream.flush();
   }
+#if __cplusplus <= 199711L
   delete impl_;
+#endif
 }
 
 Error File::Open(const std::string& path, OpenMode mode) {
@@ -361,6 +368,15 @@ uint64_t File::Tell() const {
 }
 
 #if __cplusplus > 199711L
+
+File::File(File&& other) : impl_(nullptr) {
+  impl_.reset(other.impl_.release());
+}
+
+File& File::operator=(File&& other) {
+  impl_.reset(other.impl_.release());
+}
+
 
 std::error_code make_error_code(Error err) {
   switch (err) {

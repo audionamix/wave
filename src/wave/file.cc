@@ -30,9 +30,6 @@ enum Format {
 
 class File::Impl {
  public:
-  Impl() {}
-  ~Impl() {}
-
   Error WriteHeader(uint64_t data_size) {
     if (!ostream.is_open()) {
       return kNotOpen;

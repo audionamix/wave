@@ -22,7 +22,6 @@ class File {
  public:
   File();
   ~File();
-  // File(const File& file);
 
   /**
    * @brief Open wave file at given path

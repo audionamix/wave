@@ -398,6 +398,11 @@ void File::Write(const std::vector<float>& data, std::error_code& err) {
   err = make_error_code(wave_error);
 }
 
+void File::Open(const std::string& path, OpenMode mode, std::error_code& err) {
+  auto wave_error = Open(path, mode);
+  err = make_error_code(wave_error);
+}
+
 #endif  // __cplusplus > 199711L
 
 }  // namespace wave

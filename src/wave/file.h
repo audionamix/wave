@@ -79,6 +79,7 @@ class File {
   std::vector<float> Read(std::error_code& err);
   std::vector<float> Read(uint64_t frame_number, std::error_code& err);
   void Write(const std::vector<float>& data, std::error_code& err);
+  void Open(const std::string& path, OpenMode mode, std::error_code& err);
 #endif  // __cplusplus > 199711L
 
   uint16_t channel_number() const;

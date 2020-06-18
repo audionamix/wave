@@ -170,6 +170,21 @@ TEST(Wave, Write24bits) {
 }
 
 #if __cplusplus > 199711L
+TEST(Wave, OpenModern) {
+  using namespace wave;
+  std::error_code err;
+
+  File read_file;
+  read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn, err);
+
+  ASSERT_FALSE(err);
+
+  File incorrect_file;
+  incorrect_file.Open("incorrect_path", OpenMode::kIn, err);
+
+  ASSERT_TRUE(err);
+}
+
 TEST(Wave, ReadModern) {
   using namespace wave;
   std::error_code err;

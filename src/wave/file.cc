@@ -169,7 +169,7 @@ File::~File() {
   if (impl_ != nullptr && impl_->istream.is_open()) {
     impl_->ostream.flush();
   }
-#if __cplusplus <= 199711L
+#if __cplusplus < 201103L
   delete impl_;
 #endif
 }
@@ -364,8 +364,8 @@ uint64_t File::Tell() const {
   return sample_position / channel_number();
 }
 
-#if __cplusplus > 199711L
 
+#if __cplusplus >= 201103L
 File::File(File&& other) : impl_(nullptr) {
   impl_.reset(other.impl_.release());
 }
@@ -373,7 +373,9 @@ File::File(File&& other) : impl_(nullptr) {
 File& File::operator=(File&& other) {
   impl_.reset(other.impl_.release());
 }
+#endif // __cplusplus > 201103L
 
+#if __cplusplus > 199711L
 
 std::error_code make_error_code(Error err) {
   switch (err) {

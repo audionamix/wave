@@ -170,6 +170,59 @@ TEST(Wave, Write24bits) {
 }
 
 #if __cplusplus > 199711L
+TEST(Wave, OpenModern) {
+  using namespace wave;
+  std::error_code err;
+
+  File read_file;
+  read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn, err);
+
+  ASSERT_FALSE(err);
+
+  File incorrect_file;
+  incorrect_file.Open("incorrect_path", OpenMode::kIn, err);
+
+  ASSERT_TRUE(err);
+}
+
+TEST(Wave, STD__move) {
+  using namespace wave;
+
+  // tested above
+  File read_file;
+  read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
+  std::vector<float> content;
+  read_file.Read(&content);
+
+  File moved_file = []()->File{
+    File chunk_read_file;
+    chunk_read_file.Open(gResourcePath + "/Untitled3.wav", OpenMode::kIn);
+
+    return std::move(chunk_read_file);
+  }();
+
+  // Read in two parts
+  std::vector<float> p1_content, p2_content;
+  const uint64_t kFirstPartSize = 1000;
+  auto err = moved_file.Read(kFirstPartSize, &p1_content);
+  ASSERT_EQ(err, kNoError);
+  err = moved_file.Read(moved_file.frame_number() - kFirstPartSize,
+                             &p2_content);
+  ASSERT_EQ(err, kNoError);
+
+  // check size
+  ASSERT_EQ(content.size(), p1_content.size() + p2_content.size());
+
+  // check if content is the same
+  std::vector<float> chunk_content(p1_content.size() + p2_content.size());
+  memcpy(chunk_content.data(), p1_content.data(),
+         p1_content.size() * sizeof(float));
+  memcpy(chunk_content.data() + p1_content.size(), p2_content.data(),
+         p2_content.size() * sizeof(float));
+
+  ASSERT_EQ(chunk_content, content);
+}
+
 TEST(Wave, ReadModern) {
   using namespace wave;
   std::error_code err;

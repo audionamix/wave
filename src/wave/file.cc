@@ -162,12 +162,16 @@ class File::Impl {
   uint64_t data_offset_;
 };
 
-File::File() : impl_(new Impl()) { impl_->header = MakeWAVEHeader(); }
+File::File() : impl_(new Impl()) {
+  impl_->header = MakeWAVEHeader();
+}
 File::~File() {
-  if (impl_->istream.is_open()) {
+  if (impl_ != nullptr && impl_->istream.is_open()) {
     impl_->ostream.flush();
   }
+#if __cplusplus < 201103L
   delete impl_;
+#endif
 }
 
 Error File::Open(const std::string& path, OpenMode mode) {
@@ -360,6 +364,17 @@ uint64_t File::Tell() const {
   return sample_position / channel_number();
 }
 
+
+#if __cplusplus >= 201103L
+File::File(File&& other) : impl_(nullptr) {
+  impl_.reset(other.impl_.release());
+}
+
+File& File::operator=(File&& other) {
+  impl_.reset(other.impl_.release());
+}
+#endif // __cplusplus > 201103L
+
 #if __cplusplus > 199711L
 
 std::error_code make_error_code(Error err) {
@@ -395,6 +410,11 @@ std::vector<float> File::Read(uint64_t frame_number, std::error_code& err) {
 
 void File::Write(const std::vector<float>& data, std::error_code& err) {
   auto wave_error = Write(data);
+  err = make_error_code(wave_error);
+}
+
+void File::Open(const std::string& path, OpenMode mode, std::error_code& err) {
+  auto wave_error = Open(path, mode);
   err = make_error_code(wave_error);
 }
 

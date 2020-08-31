@@ -73,12 +73,20 @@ class File {
    */
   uint64_t Tell() const;
 
+#if __cplusplus >= 201103L
+  // C++ 11 available
+  File(File&& other);             // Move constructor
+  File& operator=(File&& other);  // Move assignement operator
+#endif // __cplusplus > 201103L
+
 #if __cplusplus > 199711L
   // Modern C++ interface
+
   // TODO: add std::function version of Read and Write with encrypted
   std::vector<float> Read(std::error_code& err);
   std::vector<float> Read(uint64_t frame_number, std::error_code& err);
   void Write(const std::vector<float>& data, std::error_code& err);
+  void Open(const std::string& path, OpenMode mode, std::error_code& err);
 #endif  // __cplusplus > 199711L
 
   uint16_t channel_number() const;
@@ -94,7 +102,11 @@ class File {
   
  private:
   class Impl;
+#if __cplusplus >= 201103L
+  std::unique_ptr<Impl> impl_;
+#else // prior to c++ 11
   Impl* impl_;
+#endif //  __cplusplus <= 201103L
 };
 }  // namespace wave
 

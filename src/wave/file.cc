@@ -372,6 +372,7 @@ File::File(File&& other) : impl_(nullptr) {
 
 File& File::operator=(File&& other) {
   impl_.reset(other.impl_.release());
+  return *this;
 }
 #endif // __cplusplus > 201103L
 

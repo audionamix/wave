@@ -18,6 +18,12 @@ add_library(wave
   ${src}/wave/file.cc
 )
 
+# include path
+target_include_directories(wave
+  INTERFACE
+    ${src}
+)
+
 # install rules
 install(TARGETS wave
   RUNTIME DESTINATION bin

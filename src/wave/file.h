@@ -89,7 +89,12 @@ class File {
   // TODO: add std::function version of Read and Write with encrypted
   std::vector<float> Read(std::error_code& err);
   std::vector<float> Read(uint64_t frame_number, std::error_code& err);
-  void Write(const std::vector<float>& data, std::error_code& err);
+  /**
+   * @brief Write the given data
+   * @param clip : if true, hard-clip (force value between -1. and 1.) before writing, 
+   * else leave data intact. default to false
+   */
+  void Write(const std::vector<float>& data, std::error_code& err, bool clip = false);
   void Open(const std::string& path, OpenMode mode, std::error_code& err);
 #endif  // __cplusplus > 199711L
 

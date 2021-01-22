@@ -53,15 +53,19 @@ class File {
   /**
    * @brief Write the given data
    * @note: File has to be opened in kIn mode or kNotOpen will be returned.
+   * @param clip : if true, hard-clip (force value between -1. and 1.) before writing, 
+   * else leave data intact. default to false
    */
-  Error Write(const std::vector<float>& data);
+  Error Write(const std::vector<float>& data, bool clip = false);
 
   /**
    * @brief Write and Encrypt using encryption function
    * @note: File has to be opened in kIn mode or kNotOpen will be returned.
+   * @param clip : if true, hard-clip (force value between -1. and 1.) before writing, 
+   * else leave data intact. default to false
    */
   Error Write(const std::vector<float>& data,
-              void (*encrypt)(char* data, size_t size));
+              void (*encrypt)(char* data, size_t size), bool clip = false);
   
   /**
    * Move to the given frame in the file

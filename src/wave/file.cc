@@ -288,12 +288,12 @@ Error File::Read(uint64_t frame_number, void (*decrypt)(char*, size_t),
   return kNoError;
 }
 
-Error File::Write(const std::vector<float>& data) {
-  return Write(data, internal::NoEncrypt);
+Error File::Write(const std::vector<float>& data, bool clip) {
+  return Write(data, internal::NoEncrypt, clip);
 }
 
 Error File::Write(const std::vector<float>& data,
-                  void (*encrypt)(char* data, size_t size)) {
+                  void (*encrypt)(char* data, size_t size), bool clip) {
   if (!impl_->ostream.is_open()) {
     return kNotOpen;
   }
@@ -302,7 +302,15 @@ Error File::Write(const std::vector<float>& data,
   auto bits_per_sample = impl_->header.fmt.bits_per_sample;
 
   // write each samples
-  for (const auto sample : data) {
+  for (auto sample : data) {
+    // hard-clip if asked 
+    if (clip) {
+      if (sample > 1.f) {
+        sample = 1.f;
+      } else if (sample < -1.f) {
+        sample = -1.f;
+      }
+    }
     if (bits_per_sample == 8) {
       // 8bits case
       int8_t value =
@@ -409,8 +417,8 @@ std::vector<float> File::Read(uint64_t frame_number, std::error_code& err) {
   return output;
 }
 
-void File::Write(const std::vector<float>& data, std::error_code& err) {
-  auto wave_error = Write(data);
+void File::Write(const std::vector<float>& data, std::error_code& err, bool clip) {
+  auto wave_error = Write(data, clip);
   err = make_error_code(wave_error);
 }
 

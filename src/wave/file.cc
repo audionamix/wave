@@ -417,8 +417,8 @@ std::vector<float> File::Read(uint64_t frame_number, std::error_code& err) {
   return output;
 }
 
-void File::Write(const std::vector<float>& data, std::error_code& err) {
-  auto wave_error = Write(data);
+void File::Write(const std::vector<float>& data, std::error_code& err, bool clip) {
+  auto wave_error = Write(data, clip);
   err = make_error_code(wave_error);
 }
 

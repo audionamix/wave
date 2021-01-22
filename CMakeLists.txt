@@ -56,7 +56,7 @@ if(wave_enable_tests)
   endforeach()
 endif ()
 
-set(src "${CMAKE_SOURCE_DIR}/src")
+set(src "${PROJECT_SOURCE_DIR}/src")
 include_directories(${src})
 
 add_subdirectory("./src")

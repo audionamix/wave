@@ -18,7 +18,7 @@ if(wave_enable_tests)
   set(gtest_install_dir ${CMAKE_BINARY_DIR}/gtest-install)
   ExternalProject_Add(external_googletest
     GIT_REPOSITORY "https://github.com/google/googletest.git"
-    GIT_TAG "718fd88d8f145c63b8cc134cf8fed92743cc112f"  # commit fixing visual studio 2017 errors
+    GIT_TAG "release-1.10.0"  # Fix GCC 9 compilation 
     UPDATE_COMMAND ""
     CMAKE_ARGS
       "-Dgtest_force_shared_crt=ON"

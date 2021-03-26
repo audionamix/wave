@@ -41,6 +41,14 @@ Error HeaderList::Init(const std::string& path) {
   return Error::kNoError;
 }
 
+Error HeaderList::Init(const std::wstring& path) {
+  stream_.open(path, std::ios::binary);
+  if (!stream_.is_open()) {
+    return Error::kFailedToOpen;
+  }
+  return Error::kNoError;
+}
+
 HeaderList::Iterator HeaderList::begin() {
   return HeaderList::Iterator(&stream_, 0);
 }

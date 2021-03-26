@@ -24,6 +24,7 @@ class HeaderList {
   };
 
   Error Init(const std::string& path);
+  Error Init(const std::wstring& path);
   Iterator begin();
   Iterator end();
   

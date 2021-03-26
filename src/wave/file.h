@@ -27,6 +27,7 @@ class File {
    * @brief Open wave file at given path
    */
   Error Open(const std::string& path, OpenMode mode);
+  Error Open(const std::wstring& path, OpenMode mode);
 
   /**
    * @brief Read the entire content of file.

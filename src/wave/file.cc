@@ -195,6 +195,28 @@ Error File::Open(const std::string& path, OpenMode mode) {
   return impl_->ReadHeader(&headers);
 }
 
+Error File::Open(const std::wstring& path, OpenMode mode) {
+  if (mode == OpenMode::kOut)
+  {
+    impl_->ostream.open(path, std::ios::binary | std::ios::trunc);
+    if (!impl_->ostream.is_open()) {
+      return Error::kFailedToOpen;
+    }
+    return impl_->WriteHeader(0);
+  }
+
+  impl_->istream.open(path, std::ios::binary);
+  if (!impl_->istream.is_open()) {
+    return Error::kFailedToOpen;
+  }
+  HeaderList headers;
+  auto error = headers.Init(path);
+  if (error != kNoError) {
+    return error;
+  }
+  return impl_->ReadHeader(&headers);
+}
+
 uint16_t File::channel_number() const { return impl_->header.fmt.num_channel; }
 void File::set_channel_number(uint16_t channel_number) {
   impl_->header.fmt.num_channel = channel_number;

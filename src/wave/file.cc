@@ -280,7 +280,7 @@ Error File::Read(uint64_t frame_number, void (*decrypt)(char*, size_t),
       impl_->istream.read(reinterpret_cast<char*>(&value), sizeof(value));
       decrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       (*output)[sample_idx] =
-          static_cast<float>(value) / std::numeric_limits<int32_t>::max();
+          static_cast<float>(value) / static_cast<float>(std::numeric_limits<int32_t>::max());
     } else {
       return kInvalidFormat;
     }
@@ -337,7 +337,7 @@ Error File::Write(const std::vector<float>& data,
     } else if (bits_per_sample == 32) {
       // 32bits
       int32_t value =
-          static_cast<int32_t>(sample * std::numeric_limits<int32_t>::max());
+          static_cast<int32_t>(sample * static_cast<float>(std::numeric_limits<int32_t>::max()));
       encrypt(reinterpret_cast<char*>(&value), sizeof(value) / sizeof(char));
       impl_->ostream.write(reinterpret_cast<char*>(&value), sizeof(value));
     } else {
